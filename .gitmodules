@@ -1,0 +1,3 @@
+[submodule "lib/PushbulletTargets"]
+	path = lib/PushbulletTargets
+	url = https://github.com/ruuk/PushbulletTargets.git
