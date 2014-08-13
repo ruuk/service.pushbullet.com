@@ -119,16 +119,20 @@ def renameDevice():
 
 	
 if __name__ == '__main__':
-	args = None
-	if len(sys.argv) > 1:
-		args = sys.argv[1:]
-	
-	if args:
-		if args[0] == 'LINK_DEVICE':
-			linkDevice()
-		elif args[0] == 'RENAME_DEVICE':
-			renameDevice()
-		elif args[0] == 'TOKEN_FROM_FILE':
-			loadTokenFromFile()
-	else:
-		pass
+	try:
+		args = None
+		if len(sys.argv) > 1:
+			args = sys.argv[1:]
+		
+		if args:
+			if args[0] == 'LINK_DEVICE':
+				linkDevice()
+			elif args[0] == 'RENAME_DEVICE':
+				renameDevice()
+			elif args[0] == 'TOKEN_FROM_FILE':
+				loadTokenFromFile()
+		else:
+			pass
+	except:
+		import traceback
+		traceback.print_exc()
