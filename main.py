@@ -117,6 +117,14 @@ def renameDevice():
 	except PushbulletTargets.PushbulletException, e:
 		showError(e.message)
 
+def saveToken(token):
+	util.setSetting('token',token)
+
+def authorize():
+	import OAuthHelper
+	
+	token = OAuthHelper.getToken('pushbullet')
+	if token: saveToken(token)
 	
 if __name__ == '__main__':
 	try:
@@ -131,6 +139,8 @@ if __name__ == '__main__':
 				renameDevice()
 			elif args[0] == 'TOKEN_FROM_FILE':
 				loadTokenFromFile()
+			elif args[0] == 'AUTHORIZE':
+				authorize()
 		else:
 			pass
 	except:

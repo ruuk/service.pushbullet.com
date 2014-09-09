@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <settings>
-  <!-- General -->
   <category label="Main">
+    <setting label="Authorize" type="action" action="RunScript(service.pushbullet.com,AUTHORIZE)" option="close" />
+    <setting id="device_iden" label="Link This Kodi Device" type="action" action="RunScript(service.pushbullet.com,LINK_DEVICE)" option="close" />
+	<setting id="device_name" label="This Kodi Device Name" type="action" action="RunScript(service.pushbullet.com,RENAME_DEVICE)" option="close" enable="!eq(-1,)" />
+  </category>
+  <category label="Advanced">
     <setting id="token" type="text" label="Pushbullet Token" />
 	<setting  label="Load Token From File" type="action" action="RunScript(service.pushbullet.com,TOKEN_FROM_FILE)" />
-    <setting id="device_iden" label="Link This Kodi Device" type="action" action="RunScript(service.pushbullet.com,LINK_DEVICE)" option="close" enable="!eq(-2,)" />
-	<setting id="device_name" label="This Kodi Device Name" type="action" action="RunScript(service.pushbullet.com,RENAME_DEVICE)" option="close" enable="!eq(-3,) + !eq(-1,)" />
   </category>
 </settings>
