@@ -124,6 +124,18 @@ def authorize():
 	if token: saveToken(token)
 
 def main():
+	if not util.getToken():
+		import xbmcgui
+		xbmcgui.Dialog().ok('Needs Setup','Please open the addon settings, ','authorize the addon and add this device.')
+		util.ADDON.openSettings()
+		return
+		
+	if not util.getSetting('device_iden'):
+		import xbmcgui
+		xbmcgui.Dialog().ok('Needs Setup','This device still needs to be added.','Please open the addon settings, ','and add this device.')
+		util.ADDON.openSettings()
+		return
+
 	from lib import gui
 	gui.start()
 

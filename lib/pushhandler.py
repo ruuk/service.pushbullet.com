@@ -27,7 +27,6 @@ def checkForWindow():
 def handlePush(data,from_gui=False):
 	if not from_gui and checkForWindow(): #Do nothing if the window is open
 		return False
-	print data
 	if data.get('type') == 'link':
 		url = data.get('url','')
 		if StreamExtractor.mightHaveVideo(url):
@@ -60,7 +59,6 @@ def handlePush(data,from_gui=False):
 		xbmc.executebuiltin('XBMC.RunScript(special://home/addons/service.pushbullet.com/lib/maps.py,service.pushbullet.com,%s,None,)' % urllib.quote(data.get('address','')))
 		return True
 
-	print data
 	return False
 	
 	'''{u'iden': u'ujxCHwc6fiSsjAl11HK7y0',

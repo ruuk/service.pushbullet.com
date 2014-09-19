@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
-import xbmcgui, time
+import xbmc, xbmcgui, time, urllib
 import util
 import pushhandler
 import PushbulletTargets
 import devices
 import maps
+import YDStreamExtractor as StreamExtractor 
 
 class BaseWindow(xbmcgui.WindowXML):
 	def __init__(self,*args,**kwargs):
@@ -36,6 +37,7 @@ class PushbulletWindow(BaseWindow):
 		token = util.getSetting('token')
 		if not token: return
 		
+		loadVideoThunmbs = util.getSetting('load_video_thumbs',False)
 		kodiDevice = devices.getDefaultKodiDevice()
 		if not kodiDevice: return
 		self.pushList.reset()
@@ -56,15 +58,19 @@ class PushbulletWindow(BaseWindow):
 						ct+=1
 						if ct > 50: break
 					desc = ', '.join(li)
+				desc = '[CR]'.join(desc.splitlines()[:4])
 				item.setProperty('description',desc)
 				item.setProperty('info',push.get('url',push.get('file_url','')))
 				item.setProperty('sender',push.get('sender_email',''))
 				bg = push.get('image_url','')
 				if push.get('type') == 'address':
-					import urllib
 					bg = maps.Maps().getMap(urllib.quote(push.get('address','')),'None',marker=True,return_url_only=True)
+				elif push.get('type') == 'link' and loadVideoThunmbs:
+					url = push.get('url')
+					if StreamExtractor.mightHaveVideo(url):
+						bg = StreamExtractor.getVideoInfo(url).selectedStream().get('thumbnail','')
 				item.setProperty('background',bg)
-				item.setProperty('date',time.strftime('%m-%d-%Y %H:%M',time.gmtime(push.get('created',0))))
+				item.setProperty('date',time.strftime('%m-%d-%Y %H:%M',time.localtime(push.get('created',0))))
 				items.append(item)
 		self.setProperty('loading','0')
 		self.pushList.addItems(items)
@@ -79,13 +85,18 @@ class PushbulletWindow(BaseWindow):
 				xbmcgui.Dialog().ok('Sorry','Sorry:','','No handler for this type of push.')
 
 	def onAction(self,action):
-		if action.getId() == xbmcgui.ACTION_SHOW_INFO:
-			self.onInit()
-		elif action.getId() == xbmcgui.ACTION_CONTEXT_MENU:
-			self.doMenu()
-		push = self.getSelectedPush()
-		if push: self.lastSelected = push.get('iden')
-		BaseWindow.onAction(self,action)
+		try:
+			if action.getId() == 11: #xbmcgui.ACTION_SHOW_INFO:
+				self.onInit()
+			elif action.getId() == 117: #xbmcgui.ACTION_CONTEXT_MENU:
+				self.doMenu()
+			push = self.getSelectedPush()
+			if push: self.lastSelected = push.get('iden')
+		except:
+			import traceback
+			xbmc.log(traceback.format_exc())
+		finally:
+			BaseWindow.onAction(self,action)
 		
 	def getSelectedPush(self):
 		selected = self.pushList.getSelectedPosition()

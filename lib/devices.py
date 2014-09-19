@@ -67,6 +67,7 @@ class KodiDevice(PushbulletTargets.Device):
 
 def getDefaultKodiDevice(device=None):
 	ID = util.getSetting('device_iden')
+	if not ID: return None
 	if device and device.ID == ID: return device
 	name = util.getSetting('device_name')
 	return KodiDevice(ID,name)

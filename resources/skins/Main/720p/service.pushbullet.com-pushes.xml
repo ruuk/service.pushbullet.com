@@ -30,14 +30,14 @@
 				<width>1280</width>
 				<height>720</height>
 				<scrolltime>200</scrolltime>
-				<itemlayout height="130">
+				<itemlayout height="150">
 					<control type="group">
 						<visible>!IsEmpty(ListItem.Property(background))</visible>
 						<control type="image">
 							<posx>0</posx>
 							<posy>0</posy>
 							<width>1280</width>
-							<height>130</height>
+							<height>150</height>
 							<texture>$INFO[ListItem.Property(background)]</texture>
 							<aspectratio>scale</aspectratio>
 						</control>
@@ -45,7 +45,7 @@
 							<posx>0</posx>
 							<posy>0</posy>
 							<width>1280</width>
-							<height>130</height>
+							<height>150</height>
 							<texture>service-pushbullet-com-white_square.png</texture>
 							<colordiffuse>80FFFFFF</colordiffuse>
 						</control>
@@ -53,7 +53,7 @@
 					<control type="group">
 						<control type="image">
 							<posx>30</posx>
-							<posy>6</posy>
+							<posy>16</posy>
 							<width>118</width>
 							<height>118</height>
 							<aspectratio align="left'">keep</aspectratio>
@@ -73,8 +73,8 @@
 						<control type="textbox">
 							<posx>158</posx>
 							<posy>43</posy>
-							<width>1250</width>
-							<height>55</height>
+							<width>1122</width>
+							<height>75</height>
 							<font>font10</font>
 							<textcolor>FF000000</textcolor>
 							<align>left</align>
@@ -82,8 +82,8 @@
 						</control>
 						<control type="label">
 							<posx>158</posx>
-							<posy>98</posy>
-							<width>750</width>
+							<posy>118</posy>
+							<width>900</width>
 							<height>20</height>
 							<font>font10</font>
 							<textcolor>FF202020</textcolor>
@@ -92,8 +92,8 @@
 						</control>
 						<control type="label">
 							<posx>1250</posx>
-							<posy>98</posy>
-							<width>550</width>
+							<posy>118</posy>
+							<width>182</width>
 							<height>20</height>
 							<font>font10</font>
 							<textcolor>FF202020</textcolor>
@@ -121,19 +121,19 @@
 					</control>
 					<control type="image">
 						<posx>0</posx>
-						<posy>130</posy>
+						<posy>150</posy>
 						<width>1280</width>
 						<height>2</height>
 						<texture>service-pushbullet-com-white_square.png</texture>
 						<colordiffuse>FF000000</colordiffuse>
 					</control>
 				</itemlayout>
-				<focusedlayout height="130">
+				<focusedlayout height="150">
 					<control type="image">
 						<posx>0</posx>
 						<posy>0</posy>
 						<width>1280</width>
-						<height>130</height>
+						<height>150</height>
 						<texture>service-pushbullet-com-white_square.png</texture>
 						<colordiffuse>FF666666</colordiffuse>
 					</control>
@@ -143,7 +143,7 @@
 							<posx>0</posx>
 							<posy>0</posy>
 							<width>1280</width>
-							<height>130</height>
+							<height>150</height>
 							<texture>$INFO[ListItem.Property(background)]</texture>
 							<aspectratio>scale</aspectratio>
 						</control>
@@ -152,7 +152,7 @@
 						<posx>0</posx>
 						<posy>0</posy>
 						<width>1280</width>
-						<height>130</height>
+						<height>150</height>
 						<texture>service-pushbullet-com-white_square.png</texture>
 						<colordiffuse>AA006000</colordiffuse>
 					</control>
@@ -166,7 +166,7 @@
 					</control>
 					<control type="image">
 						<posx>0</posx>
-						<posy>130</posy>
+						<posy>150</posy>
 						<width>1280</width>
 						<height>2</height>
 						<texture>service-pushbullet-com-white_square.png</texture>
@@ -176,7 +176,7 @@
 					<control type="group">
 						<control type="image">
 							<posx>30</posx>
-							<posy>6</posy>
+							<posy>16</posy>
 							<width>118</width>
 							<height>118</height>
 							<aspectratio align="left'">keep</aspectratio>
@@ -196,8 +196,8 @@
 						<control type="textbox">
 							<posx>158</posx>
 							<posy>43</posy>
-							<width>1250</width>
-							<height>55</height>
+							<width>1122</width>
+							<height>75</height>
 							<font>font10</font>
 							<textcolor>FFFFFFFF</textcolor>
 							<align>left</align>
@@ -205,21 +205,21 @@
 						</control>
 						<control type="label">
 							<posx>158</posx>
-							<posy>98</posy>
-							<width>750</width>
+							<posy>118</posy>
+							<width>900</width>
 							<height>20</height>
 							<font>font10</font>
-							<textcolor>FFB0B0B0</textcolor>
+							<textcolor>FFD0D0D0</textcolor>
 							<align>left</align>
 							<label>$INFO[ListItem.Property(info)]</label>
 						</control>
 						<control type="label">
 							<posx>1250</posx>
-							<posy>98</posy>
-							<width>550</width>
+							<posy>118</posy>
+							<width>182</width>
 							<height>20</height>
 							<font>font10</font>
-							<textcolor>FFB0B0B0</textcolor>
+							<textcolor>FFD0D0D0</textcolor>
 							<align>right</align>
 							<label>$INFO[ListItem.Property(sender)]</label>
 						</control>
@@ -229,7 +229,7 @@
 							<width>500</width>
 							<height>20</height>
 							<font>font10</font>
-							<textcolor>FFB0B0B0</textcolor>
+							<textcolor>FFD0D0D0</textcolor>
 							<align>right</align>
 							<label>$INFO[ListItem.Property(date)]</label>
 						</control>
