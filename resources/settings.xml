@@ -3,7 +3,10 @@
   <category label="Main">
     <setting label="Authorize" type="action" action="RunScript(service.pushbullet.com,AUTHORIZE)" option="close" />
     <setting id="device_iden" label="Link This Kodi Device" type="action" action="RunScript(service.pushbullet.com,LINK_DEVICE)" option="close" />
-	<setting id="device_name" label="This Kodi Device Name" type="action" action="RunScript(service.pushbullet.com,RENAME_DEVICE)" option="close" enable="!eq(-1,)" />
+    <setting id="device_name" label="This Kodi Device Name" type="action" action="RunScript(service.pushbullet.com,RENAME_DEVICE)" option="close" enable="!eq(-1,)" />
+    <setting id="instant_play" type="bool" default="true" label="Play Media Instantly" />
+    <setting id="interrupt_media" type="bool" default="false" label="Interrupt Video/Music" subsetting="true" enable="eq(-1,true)" />
+    <setting id="show_notification" type="bool" default="false" label="Show Notification On New Push" enable="eq(-2,false)" />
   </category>
   <category label="Advanced">
     <setting id="token" type="text" label="Pushbullet Token" />

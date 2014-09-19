@@ -1,29 +1,17 @@
 # -*- coding: utf-8 -*-
 import xbmc, xbmcgui
-from lib import util
+from lib import util, pushhandler
 
 from lib import PushbulletTargets
 PushbulletTargets.LOG = util.LOG
 
 from lib import devices
-import YDStreamExtractor as StreamExtractor
 import YDStreamUtils as StreamUtils
 
-def handlePush(data):
-	if data.get('type') == 'link':
-		url = data.get('url','')
-		if StreamExtractor.mightHaveVideo(url):
-			vid = StreamExtractor.getVideoInfo(url)
-			if vid.hasMultipleStreams():
-				vlist = []
-				for info in vid.streams():
-					vlist.append(info['title'] or '?')
-				idx = xbmcgui.Dialog().select('Select Video',vlist)
-				if idx < 0: return
-				vid.selectStream(idx)
-			util.LOG(vid.streamURL()) #TODO: REMOVE
-			StreamUtils.play(vid.streamURL())
-		
+def ERROR():
+	import traceback
+	xbmc.log(traceback.format_exc())
+
 class PushbulletService(xbmc.Monitor):
 	def __init__(self):
 		self.isActive = False
@@ -42,23 +30,46 @@ class PushbulletService(xbmc.Monitor):
 	def loadSettings(self):
 		oldToken = self.token
 		oldDevice = self.device
+		self.interruptMedia = util.getSetting('interrupt_media',False)
+		self.instantPlay = util.getSetting('instant_play',True)
+		self.showNotification = util.getSetting('show_notification',True)
 		self.token = util.getSetting('token')
-		self.device = devices.getDefaultKodiDevice()
+		self.device = devices.getDefaultKodiDevice(self.device)
 
 		self.isActive = self.token and self.device.isValid()
 		if self.isActive:
 			if not self.targets or self.token != oldToken:
-				self.setTargets()
+				self.setTargets(oldToken)
 			elif self.targets and self.device != oldDevice:
 				self.targets.unregisterDevice(oldDevice)
 				self.targets.registerDevice(self.device)
 				util.LOG('DEVICE CHANGED FROM: {0} TO: {1}'.format(oldDevice.name,self.device.name))
 
-	def setTargets(self):
+	def mostRecentUpdated(self,modified):
+		util.setSetting('most_recent','{0:10f}'.format(modified))
+
+	def setTargets(self,oldToken):
 		old = self.targets
-		self.targets = PushbulletTargets.Targets(self.token)
-		self.targets.registerDevice(self.device)
-		self.targets.connect()
+		
+		targets = PushbulletTargets.Targets(
+			self.token,
+			most_recent=util.getSetting('most_recent',0),
+			most_recent_callback=self.mostRecentUpdated
+		)
+		
+		targets.registerDevice(self.device)
+		try:
+			targets.connect()
+		except:
+			ERROR()
+			self.token = oldToken
+			if self.targets: self.targets.registerDevice(self.device)
+			self.isActive = self.token and self.device.isValid()
+			util.LOG('CONNECT ERROR - REVERTING TOKEN')
+			return
+
+		self.targets = targets
+
 		if old:
 			util.LOG('TOKEN CHANGED - TARGETS RESET')
 			old.close(force=True)
@@ -80,8 +91,23 @@ class PushbulletService(xbmc.Monitor):
 					
 		while self.isActive and not self.targets.terminated and not xbmc.abortRequested:
 			self.targets._th.join(timeout=0.2)
-			data = self.device.getNext()
-			if data: handlePush(data)
+			if self.device.hasPush():
+				if self.instantPlay:
+					if not StreamUtils.isPlaying() or self.interruptMedia:
+						data = self.device.getNext()
+						if data: pushhandler.handlePush(data)
+				else:
+					if self.showNotification:
+						data = self.device.getNext()
+						if data:
+							xbmcgui.Dialog().notification(
+								'New Push: {0}'.format(data.get('type','?')),
+								data.get('title',''),
+								util.ADDON.getAddonInfo('icon'),
+								5000
+							)
+					self.device.clear()
+
 			xbmc.sleep(200)
 
 		self.targets.close(force=True)

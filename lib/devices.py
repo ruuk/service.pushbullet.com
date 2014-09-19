@@ -1,12 +1,19 @@
 # -*- coding: utf-8 -*-
 import Queue
 import PushbulletTargets
-import YDStreamExtractor as StreamExtractor
 import util
+import pushhandler
 
 class KodiDevice(PushbulletTargets.Device):
 	def init(self):
 		self.queue = Queue.Queue()
+
+	def clear(self):
+		push = True
+		while push: push = self.getNext()
+
+	def hasPush(self):
+		return not self.queue.empty()
 
 	def getNext(self):
 		if self.queue.empty(): return None
@@ -19,14 +26,47 @@ class KodiDevice(PushbulletTargets.Device):
 		return None
 
 	def link(self,data):
-		url = data.get('url','')
-		#title = data.get('title','')
-		#message = data.get('body','')
-		if not StreamExtractor.mightHaveVideo(url): return True
+		if not pushhandler.canHandle(data):
+			pushhandler.checkForWindow()
+			return
+
 		self.queue.put_nowait(data)
-		return True
-		
-def getDefaultKodiDevice():
+		return False
+
+	def file(self,data):
+		if not pushhandler.canHandle(data):
+			pushhandler.checkForWindow()
+			return
+
+		self.queue.put_nowait(data)
+		return False
+
+	def note(self,data):
+		if not pushhandler.canHandle(data):
+			pushhandler.checkForWindow()
+			return
+
+		self.queue.put_nowait(data)
+		return False
+
+	def list(self,data):
+		if not pushhandler.canHandle(data):
+			pushhandler.checkForWindow()
+			return
+
+		self.queue.put_nowait(data)
+		return False
+	
+	def address(self,data):
+		if not pushhandler.canHandle(data):
+			pushhandler.checkForWindow()
+			return
+
+		self.queue.put_nowait(data)
+		return False
+
+def getDefaultKodiDevice(device=None):
 	ID = util.getSetting('device_iden')
+	if device and device.ID == ID: return device
 	name = util.getSetting('device_name')
 	return KodiDevice(ID,name)

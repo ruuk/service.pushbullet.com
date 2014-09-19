@@ -7,13 +7,10 @@ def showError(msg):
 	xbmcgui.Dialog().ok('ERROR', 'Error:','',msg)
 	
 def loadTokenFromFile():
-	import xbmcgui
+	import OAuthHelper
 	
-	fpath = xbmcgui.Dialog().browseSingle(1,'Browse to file containing token','files')
-	if not fpath: return
-	with open(fpath,'r') as f:
-		token = f.read().strip()
-	util.setSetting('token',token)
+	token = OAuthHelper.getToken('service.pushbullet.com',from_file=True)
+	if token: saveToken(token)
 
 def deviceNameExists(client,name):
 	from lib import PushbulletTargets
@@ -123,9 +120,13 @@ def saveToken(token):
 def authorize():
 	import OAuthHelper
 	
-	token = OAuthHelper.getToken('pushbullet')
+	token = OAuthHelper.getToken('service.pushbullet.com')
 	if token: saveToken(token)
-	
+
+def main():
+	from lib import gui
+	gui.start()
+
 if __name__ == '__main__':
 	try:
 		args = None
@@ -142,7 +143,7 @@ if __name__ == '__main__':
 			elif args[0] == 'AUTHORIZE':
 				authorize()
 		else:
-			pass
+			main()
 	except:
 		import traceback
 		traceback.print_exc()
