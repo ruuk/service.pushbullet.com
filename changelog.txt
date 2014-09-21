@@ -1,5 +1,13 @@
 Changelog for service.pushbullet.com
 
+*** 0.1.1 ***
+
+Added the ability to download file and link pushes
+Added the ability to play link and file pushes that point to media files
+Added media type sub-icons
+List view will now update checkboxes dynamically when toggled remotely
+Now caches video thumbnails when 'Load Video Thumbnails' is enabled
+
 *** 0.1.0 ***
 
 Initial public release

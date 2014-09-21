@@ -4,12 +4,26 @@ import YDStreamExtractor as StreamExtractor
 import YDStreamUtils as StreamUtils
 import util
 
+def getURLMediaType(url):
+	videoTypes = xbmc.getSupportedMedia('video')
+	musicTypes = xbmc.getSupportedMedia('music')
+	imageTypes = xbmc.getSupportedMedia('picture')
+	ext = url.rsplit('.',1)[-1]
+	if ext in videoTypes:
+		return 'video'
+	elif ext in musicTypes:
+		return 'music'
+	elif ext in imageTypes:
+		return 'image'
+	return None
+
 def canHandle(data):
 	if data.get('type') == 'link':
 		url = data.get('url','')
-		return StreamExtractor.mightHaveVideo(url)
+		if StreamExtractor.mightHaveVideo(url): return True
+		return bool(getURLMediaType(url))
 	elif data.get('type') == 'file':
-		return data.get('file_type','').startswith('image/')
+		return data.get('file_type','').startswith('image/') or data.get('file_type','').startswith('audio/') or data.get('file_type','').startswith('video/')
 	elif data.get('type') == 'note':
 		return True
 	elif data.get('type') == 'list':
@@ -20,8 +34,7 @@ def canHandle(data):
 
 def checkForWindow():
 	if not xbmc.getCondVisibility('IsEmpty(Window.Property(pushbullet))'):
-		if not xbmc.getCondVisibility('IsEmpty(Window.Property(pushbulletmain))'):
-			xbmc.executebuiltin('Action(info)')
+		xbmc.executebuiltin('Action(info)')
 		return True
 
 def handlePush(data,from_gui=False):
@@ -31,20 +44,32 @@ def handlePush(data,from_gui=False):
 		url = data.get('url','')
 		if StreamExtractor.mightHaveVideo(url):
 			vid = StreamExtractor.getVideoInfo(url)
-			if vid.hasMultipleStreams():
-				vlist = []
-				for info in vid.streams():
-					vlist.append(info['title'] or '?')
-				idx = xbmcgui.Dialog().select('Select Video',vlist)
-				if idx < 0: return
-				vid.selectStream(idx)
-			util.LOG(vid.streamURL()) #TODO: REMOVE
-			StreamUtils.play(vid.streamURL())
+			if vid:
+				if vid.hasMultipleStreams():
+					vlist = []
+					for info in vid.streams():
+						vlist.append(info['title'] or '?')
+					idx = xbmcgui.Dialog().select('Select Video',vlist)
+					if idx < 0: return
+					vid.selectStream(idx)
+				util.LOG(vid.streamURL()) #TODO: REMOVE
+				StreamUtils.play(vid.streamURL())
+				return True
+		media = getURLMediaType(url)
+		if media == 'video' or media == 'music':
+			StreamUtils.play(url)
+			return True
+		elif media == 'image':
+			import gui
+			gui.showImage(url)
 			return True
 	elif data.get('type') == 'file':
 		if data.get('file_type','').startswith('image/'):
 			import gui
 			gui.showImage(data.get('file_url',''))
+			return True
+		elif data.get('file_type','').startswith('video/') or data.get('file_type','').startswith('audio/'):
+			StreamUtils.play(data.get('file_url',''))
 			return True
 	elif data.get('type') == 'note':
 		import gui
@@ -78,3 +103,15 @@ def handlePush(data,from_gui=False):
 		u'sender_iden': u'ujxCHwc6fiS',
 		u'type': u'file',
 		u'receiver_email_normalized': u'ruuk25@gmail.com'}'''
+
+#def _getVideoThumb(url,item):
+#	info = StreamExtractor.getVideoInfo(url)
+#	item.setProperty('background',info.thumbnail)
+#
+#def getVideoThumbnails(items):
+#	import threadpool
+#	pool = threadpool.ThreadPool(3)
+#	reqs = threadpool.makeRequests(_getVideoThumb, items)
+#	[pool.putRequest(req) for req in reqs]
+#	pool.wait(return_results=True)
+#	pool.dismissWorkers()

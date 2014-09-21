@@ -47,17 +47,26 @@
 							<width>1280</width>
 							<height>150</height>
 							<texture>service-pushbullet-com-white_square.png</texture>
-							<colordiffuse>80FFFFFF</colordiffuse>
+							<colordiffuse>AAFFFFFF</colordiffuse>
 						</control>
 					</control>
 					<control type="group">
-						<control type="image">
+						<control type="group">
 							<posx>30</posx>
 							<posy>16</posy>
-							<width>118</width>
-							<height>118</height>
-							<aspectratio align="left'">keep</aspectratio>
-							<texture>$INFO[ListItem.Icon]</texture>
+							<control type="image">
+								<width>118</width>
+								<height>118</height>
+								<aspectratio align="left'">keep</aspectratio>
+								<texture>$INFO[ListItem.Icon]</texture>
+							</control>
+							<control type="image">
+								<posx>75</posx>
+								<posy>75</posy>
+								<width>32</width>
+								<height>32</height>
+								<texture>$INFO[ListItem.Property(media_icon)]</texture>
+							</control>
 						</control>
 						<control type="label">
 							<posx>158</posx>
@@ -154,7 +163,7 @@
 						<width>1280</width>
 						<height>150</height>
 						<texture>service-pushbullet-com-white_square.png</texture>
-						<colordiffuse>AA006000</colordiffuse>
+						<colordiffuse>CC006000</colordiffuse>
 					</control>
 					<control type="image">
 						<posx>0</posx>
@@ -174,13 +183,22 @@
 					</control>
 					
 					<control type="group">
-						<control type="image">
+						<control type="group">
 							<posx>30</posx>
 							<posy>16</posy>
-							<width>118</width>
-							<height>118</height>
-							<aspectratio align="left'">keep</aspectratio>
-							<texture>$INFO[ListItem.Icon]</texture>
+							<control type="image">
+								<width>118</width>
+								<height>118</height>
+								<aspectratio align="left'">keep</aspectratio>
+								<texture>$INFO[ListItem.Icon]</texture>
+							</control>
+							<control type="image">
+								<posx>75</posx>
+								<posy>75</posy>
+								<width>32</width>
+								<height>32</height>
+								<texture>$INFO[ListItem.Property(media_icon)]</texture>
+							</control>
 						</control>
 						<control type="label">
 							<posx>158</posx>
