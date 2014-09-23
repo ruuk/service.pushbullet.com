@@ -190,8 +190,21 @@ class PushbulletWindow(BaseWindow):
 			if not os.path.exists(targetDir): os.makedirs(targetDir)
 			finalTargetDir = d.chooseDirectory()
 			if not finalTargetDir: return
-			url = push.get('type') == 'file' and push.get('file_url') or push.get('url')
-			d.downloadURL(targetDir,url,fname=push.get('file_name'),final_target_dir=finalTargetDir)
+			
+			url = push.get('url')
+			if push.get('type') == 'link':
+				vid = StreamExtractor.getVideoInfo(url)
+				if vid:
+					return d.youtubeDLDownload(vid,targetDir,finalTargetDir)
+			elif push.get('type') == 'file':
+				url = push.get('file_url')
+
+			fname, ftype = d.downloadURL(targetDir,url,fname=push.get('file_name'),final_target_dir=finalTargetDir)
+			if fname:
+				xbmcgui.Dialog().ok('Done','Download Complete:','[CR]',fname)
+			else:
+				xbmcgui.Dialog().ok('Download Failed','[CR]','Download Failed')
+
 		elif choice == 'delete':
 			#set last selected to the item above, or the item below if we are at the top
 			closest = selected - 1

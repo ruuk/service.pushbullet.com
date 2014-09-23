@@ -1,5 +1,10 @@
 Changelog for service.pushbullet.com
 
+*** 0.1.2 ***
+
+Added ability to download video page links via youtube-dl module
+Added success/fail dialogs on downloads
+
 *** 0.1.1 ***
 
 Added the ability to download file and link pushes

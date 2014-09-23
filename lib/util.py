@@ -139,3 +139,23 @@ class Downloader:
 		if not fpath: return None
 		return fpath
 
+	def youtubeDLDownload(self,vid,path,target=None):
+		import YDStreamExtractor as StreamExtractor 
+		import YDStreamUtils as StreamUtils	
+		if not target: target = self.chooseDirectory()
+		if not target: return
+		
+		with StreamUtils.DownloadProgress() as prog:
+			try:
+				StreamExtractor.disableDASHVideo(True)
+				StreamExtractor.setOutputCallback(prog)
+				result = StreamExtractor.downloadVideo(vid,path)
+			finally:
+				StreamExtractor.setOutputCallback(None)
+		if not result and result.status != 'canceled':
+				xbmcgui.Dialog().ok('Download Failed','[CR]',result.message)
+		elif result:
+			xbmcgui.Dialog().ok('Done','Download Complete','[CR]',result.filepath)
+		if target:
+			xbmcvfs.copy(result.filepath,os.path.join(target,os.path.basename(result.filepath)))
+			xbmcvfs.delete(result.filepath)
