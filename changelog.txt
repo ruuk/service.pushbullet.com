@@ -1,5 +1,11 @@
 Changelog for service.pushbullet.com
 
+*** 0.1.3 ***
+
+Added crappy fanart :)
+Added support for sop:// and acestream:// protocol links (requires P2P-Streams addon)
+Addes support for mms://, rtsp:// and rtmp:// protocol links
+
 *** 0.1.2 ***
 
 Added ability to download video page links via youtube-dl module

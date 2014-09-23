@@ -15,13 +15,14 @@ def getURLMediaType(url):
 		return 'music'
 	elif ext in imageTypes:
 		return 'image'
-	return None
+	return protocolMediaType(url)
 
 def canHandle(data):
 	if data.get('type') == 'link':
 		url = data.get('url','')
 		if StreamExtractor.mightHaveVideo(url): return True
-		return bool(getURLMediaType(url))
+		if getURLMediaType(url): return True
+		return canPlayURL(url)
 	elif data.get('type') == 'file':
 		return data.get('file_type','').startswith('image/') or data.get('file_type','').startswith('audio/') or data.get('file_type','').startswith('video/')
 	elif data.get('type') == 'note':
@@ -63,6 +64,9 @@ def handlePush(data,from_gui=False):
 			import gui
 			gui.showImage(url)
 			return True
+		if canPlayURL(url):
+			handleURL(url)
+			return True
 	elif data.get('type') == 'file':
 		if data.get('file_type','').startswith('image/'):
 			import gui
@@ -85,6 +89,29 @@ def handlePush(data,from_gui=False):
 		return True
 
 	return False
+	
+protocolURLs = {
+	'sop':'plugin://plugin.video.p2p-streams/?url={url}&mode=2&name=title+sopcast',
+	'acestream':'plugin://plugin.video.p2p-streams/?url={url}&mode=1&name=acestream+title',
+	'mms':'{url}',
+	'rtsp':'{url}',
+	'rtmp':'{url}'
+}
+def protocolMediaType(url):
+	protocol = url.split('://',1)[0]
+	if protocol in protocolURLs: return 'video'
+	return None
+	
+def canPlayURL(url):
+	protocol = url.split('://',1)[0]
+	return protocol in protocolURLs
+
+def handleURL(url):
+	protocol = url.split('://',1)[0]
+	if protocol in protocolURLs:
+		pluginURL = protocolURLs[protocol].format(url=url)
+		StreamUtils.play(pluginURL)
+
 	
 	'''{u'iden': u'ujxCHwc6fiSsjAl11HK7y0',
 		u'created': 1411009240.141888,

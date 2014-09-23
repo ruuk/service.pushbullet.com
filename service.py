@@ -80,7 +80,7 @@ class PushbulletService(xbmc.Monitor):
 		self.loadSettings()
 		
 		while not xbmc.abortRequested:
-			if self.isActive:
+			if self.targets and self.isActive:
 				self.active()
 			else:
 				self.idle()
