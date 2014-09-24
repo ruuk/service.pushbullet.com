@@ -5,16 +5,17 @@ import YDStreamUtils as StreamUtils
 import util
 
 def getURLMediaType(url):
-	videoTypes = xbmc.getSupportedMedia('video')
-	musicTypes = xbmc.getSupportedMedia('music')
-	imageTypes = xbmc.getSupportedMedia('picture')
-	ext = url.rsplit('.',1)[-1]
-	if ext in videoTypes:
-		return 'video'
-	elif ext in musicTypes:
-		return 'music'
-	elif ext in imageTypes:
-		return 'image'
+	if url.startswith('http'):
+		videoTypes = xbmc.getSupportedMedia('video')
+		musicTypes = xbmc.getSupportedMedia('music')
+		imageTypes = xbmc.getSupportedMedia('picture')
+		ext = url.rsplit('.',1)[-1]
+		if ext in videoTypes:
+			return 'video'
+		elif ext in musicTypes:
+			return 'music'
+		elif ext in imageTypes:
+			return 'image'
 	return protocolMediaType(url)
 
 def canHandle(data):
@@ -56,6 +57,9 @@ def handlePush(data,from_gui=False):
 				util.LOG(vid.streamURL()) #TODO: REMOVE
 				StreamUtils.play(vid.streamURL())
 				return True
+		if canPlayURL(url):
+			handleURL(url)
+			return True
 		media = getURLMediaType(url)
 		if media == 'video' or media == 'music':
 			StreamUtils.play(url)
@@ -63,9 +67,6 @@ def handlePush(data,from_gui=False):
 		elif media == 'image':
 			import gui
 			gui.showImage(url)
-			return True
-		if canPlayURL(url):
-			handleURL(url)
 			return True
 	elif data.get('type') == 'file':
 		if data.get('file_type','').startswith('image/'):

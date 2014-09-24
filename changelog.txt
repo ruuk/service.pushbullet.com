@@ -1,5 +1,9 @@
 Changelog for service.pushbullet.com
 
+*** 0.1.4 ***
+
+Fix for some protocols being handled media links in some instances
+
 *** 0.1.3 ***
 
 Added crappy fanart :)
