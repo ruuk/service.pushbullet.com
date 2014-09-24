@@ -3,7 +3,8 @@ Changelog for service.pushbullet.com
 *** 0.1.4 ***
 
 Fix for some protocols being handled media links in some instances
-Make addon a service first, program second
+Fix for service not starting on initial install
+Fix for service errors when addon is authorized but the device is not linked/added yet
 
 *** 0.1.3 ***
 
