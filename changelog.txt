@@ -3,6 +3,7 @@ Changelog for service.pushbullet.com
 *** 0.1.4 ***
 
 Fix for some protocols being handled media links in some instances
+Make addon a service first, program second
 
 *** 0.1.3 ***
 
