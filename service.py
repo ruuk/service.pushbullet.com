@@ -37,7 +37,7 @@ class PushbulletService(xbmc.Monitor):
 		self.token = util.getSetting('token')
 		self.device = devices.getDefaultKodiDevice(self.device)
 
-		self.isActive = self.token and self.device.isValid()
+		self.isActive = self.token and self.device and self.device.isValid()
 		if self.isActive:
 			if not self.targets or self.token != oldToken:
 				self.setTargets(oldToken)
