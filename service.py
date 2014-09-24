@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import sys
 import xbmc, xbmcgui
 from lib import util, pushhandler
 
@@ -119,6 +120,25 @@ class PushbulletService(xbmc.Monitor):
 
 	def done(self):
 		util.LOG('SERVICE: DONE')
-		
+
 if __name__ == '__main__':
-	PushbulletService()
+	try:
+		args = None
+		if len(sys.argv) > 1:
+			args = sys.argv[1:]
+		
+		if args:
+			import main
+			if args[0] == 'LINK_DEVICE':
+				main.linkDevice()
+			elif args[0] == 'RENAME_DEVICE':
+				main.renameDevice()
+			elif args[0] == 'TOKEN_FROM_FILE':
+				main.loadTokenFromFile()
+			elif args[0] == 'AUTHORIZE':
+				main.authorize()
+		else:
+			PushbulletService()
+	except:
+		import traceback
+		traceback.print_exc()
