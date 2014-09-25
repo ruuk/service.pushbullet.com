@@ -163,7 +163,7 @@ class PushbulletWindow(BaseWindow):
 			desc = '[CR]'.join(desc.splitlines()[:4])
 			item.setProperty('description',desc)
 			item.setProperty('info',info)
-			item.setProperty('sender','name@email.com')#push.get('sender_email',''))
+			item.setProperty('sender', push.get('sender_email',''))
 			item.setProperty('media_icon',mediaIcon)
 			item.setProperty('background',bg)
 			#item.setProperty('date',time.strftime('%m-%d-%Y %H:%M',time.localtime(push.get('created',0))))
