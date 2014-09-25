@@ -108,14 +108,13 @@ class PushbulletWindow(BaseWindow):
 				cacheIDs.append(p.get('iden'))
 
 		if self.viewMode == 'SELF':
-			self.pushes = [p for p in pushes if p.get('target_device_iden') == kodiDevice.ID]
+			self.pushes = [p for p in pushes if p.get('active') and p.get('target_device_iden') == kodiDevice.ID]
 		elif self.viewMode == 'ALL':
-			self.pushes = pushes
+			self.pushes = [p for p in pushes if p.get('active')]
 		elif self.viewMode:
-			self.pushes = [p for p in pushes if p.get('target_device_iden') == self.viewMode]
+			self.pushes = [p for p in pushes if p.get('active') and p.get('target_device_iden') == self.viewMode]
 
 		for push in self.pushes:
-			if not push.get('active'): continue
 			iden = push.get('iden')
 
 			title = push.get('title',push.get('name',push.get('file_name','')))
@@ -164,7 +163,7 @@ class PushbulletWindow(BaseWindow):
 			desc = '[CR]'.join(desc.splitlines()[:4])
 			item.setProperty('description',desc)
 			item.setProperty('info',info)
-			item.setProperty('sender',push.get('sender_email',''))
+			item.setProperty('sender','name@email.com')#push.get('sender_email',''))
 			item.setProperty('media_icon',mediaIcon)
 			item.setProperty('background',bg)
 			#item.setProperty('date',time.strftime('%m-%d-%Y %H:%M',time.localtime(push.get('created',0))))
@@ -255,10 +254,11 @@ class PushbulletWindow(BaseWindow):
 		elif choice == 'delete':
 			#set last selected to the item above, or the item below if we are at the top
 			closest = selected - 1
-			if closest < 0: closest = self.getControl(101).size() - 1
-			self.lastSelected = self.pushes[closest].get('iden')
-			self.pushes[selected]
-			
+			if closest < 0:
+				self.lastSelected = None
+			else:
+				self.lastSelected = self.pushes[closest].get('iden')
+
 			self.client.deletePush(push)
 			self.onInit()
 		elif choice == 'show_all':
