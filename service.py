@@ -129,14 +129,7 @@ if __name__ == '__main__':
 		
 		if args:
 			import main
-			if args[0] == 'LINK_DEVICE':
-				main.linkDevice()
-			elif args[0] == 'RENAME_DEVICE':
-				main.renameDevice()
-			elif args[0] == 'TOKEN_FROM_FILE':
-				main.loadTokenFromFile()
-			elif args[0] == 'AUTHORIZE':
-				main.authorize()
+			main.handleArg(args[0])
 		else:
 			PushbulletService()
 	except:

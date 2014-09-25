@@ -28,6 +28,21 @@ def cleanCache(used_ids):
 	for ID in os.listdir(CACHE_PATH):
 		if not ID in used_ids: deleteCachedData(ID)
 
+def selectDevice(client,extra='Cancel'):
+	deviceMap = {}
+	try:
+		for d in client.getDevicesList():
+			if not d.get('active'): continue
+			deviceMap[d['iden']] = d['nickname']
+	except PushbulletTargets.PushbulletException, e:
+		xbmcgui.Dialog().ok('ERROR', 'Error:','',e.message)
+		return
+	
+	idx = xbmcgui.Dialog().select('Choose Device',deviceMap.values() + [extra])
+	if idx < 0: return
+	if idx >= len(deviceMap.keys()): return ''
+	return deviceMap.keys()[idx]
+
 class BaseWindow(xbmcgui.WindowXML):
 	def __init__(self,*args,**kwargs):
 		self._closing = False
@@ -49,9 +64,25 @@ class PushbulletWindow(BaseWindow):
 	def __init__(self,*args,**kwargs):
 		self.client = PushbulletTargets.Client(util.getToken())
 		self.lastSelected = None
+		self.viewMode = 'SELF'
+		self.initViewMode()
 		self.pushes = []
 		BaseWindow.__init__(self,*args,**kwargs)
-		
+
+	def initViewMode(self):
+		setID = util.getSetting('selected_device')
+		if setID:
+			self.viewMode = setID
+		else:
+			defModeIdx = util.getSetting('default_view_mode',0)
+			viewMode = ['SELF','ALL','LAST'][defModeIdx]
+
+			if viewMode == 'LAST':
+				last = util.getSetting('last_view_mode')
+				self.viewMode = last or 'SELF'
+			else:
+				self.viewMode = viewMode
+
 	def onInit(self):
 		BaseWindow.onInit(self)
 		self.setProperty('loading','1')
@@ -67,15 +98,23 @@ class PushbulletWindow(BaseWindow):
 		pushes = self.client.pushes()
 		if not pushes: return
 		items = []
-		IDs = []
-		
-		for push in pushes:
-			if not push.get('target_device_iden') == kodiDevice.ID: continue
-		
-			self.pushes.append(push)
+		cacheIDs = []
+		self.pushes = []
 
+		for p in pushes: #Keep all IDs cached so that we don't cause a delay when changing view
+			if p.get('active'):
+				cacheIDs.append(p.get('iden'))
+
+		if self.viewMode == 'SELF':
+			self.pushes = [p for p in pushes if p.get('target_device_iden') == kodiDevice.ID]
+		elif self.viewMode == 'ALL':
+			self.pushes = pushes
+		elif self.viewMode:
+			self.pushes = [p for p in pushes if p.get('target_device_iden') == self.viewMode]
+
+		for push in self.pushes:
+			if not push.get('active'): continue
 			iden = push.get('iden')
-			IDs.append(iden)
 
 			title = push.get('title',push.get('name',push.get('file_name','')))
 			bg = push.get('image_url','')
@@ -126,7 +165,8 @@ class PushbulletWindow(BaseWindow):
 			item.setProperty('sender',push.get('sender_email',''))
 			item.setProperty('media_icon',mediaIcon)
 			item.setProperty('background',bg)
-			item.setProperty('date',time.strftime('%m-%d-%Y %H:%M',time.localtime(push.get('created',0))))
+			#item.setProperty('date',time.strftime('%m-%d-%Y %H:%M',time.localtime(push.get('created',0))))
+			item.setProperty('date','{0} ago'.format(util.durationToShortText(time.time() - push.get('created',0))))
 			items.append(item)
 
 		self.setProperty('loading','0')
@@ -135,7 +175,7 @@ class PushbulletWindow(BaseWindow):
 
 		if items: self.setFocusId(101)
 		self.reSelect()
-		cleanCache(IDs)
+		cleanCache(cacheIDs)
 
 	def onClick(self,controlID):
 		if controlID == 101:
@@ -173,12 +213,17 @@ class PushbulletWindow(BaseWindow):
 
 	def doMenu(self):
 		selected = self.pushList.getSelectedPosition()
-		if selected < 0: return
 		options = []
-		push = self.pushes[selected]
-		if push.get('type') in ('file','link'):
-			options.append(('download','Download'))
-		options.append(('delete','Delete'))
+		if self.viewMode != 'ALL':
+			options.append(('show_all','Show Pushes For All Devices'))
+		if self.viewMode != 'SELF':
+			options.append(('show_self','Show Pushes For This Device'))
+		options.append(('show_device','Show Pushes For Another Device'))
+		if selected >= 0:
+			push = self.pushes[selected]
+			if push.get('type') in ('file','link'):
+				options.append(('download','Download'))
+			options.append(('delete','Delete'))
 		idx = xbmcgui.Dialog().select('Options',[o[1] for o in options])
 		if idx < 0: return
 		choice = options[idx][0]
@@ -214,6 +259,18 @@ class PushbulletWindow(BaseWindow):
 			
 			self.client.deletePush(push)
 			self.onInit()
+		elif choice == 'show_all':
+			self.viewMode = 'ALL'
+			self.onInit()
+		elif choice == 'show_self':
+			self.viewMode = 'SELF'
+			self.onInit()
+		elif choice == 'show_device':
+			deviceID = selectDevice(self.client)
+			if not deviceID: return
+			self.viewMode = deviceID
+			self.onInit()
+		util.setSetting('last_view_mode',self.viewMode)
 
 class ImageViewWindow(BaseWindow):
 	def __init__(self,*args,**kwargs):
@@ -281,27 +338,55 @@ class ListViewWindow(BaseWindow):
 			self.data['items'][idx]['checked'] = checked
 			item.setProperty('checked',checked and '1' or '')
 			self.client.modifyPush(self.data)
-			
 
+WINDOW_FONTS = {
+	'default':{
+		'@font10@':'font10', #Small
+		'@font10T@':'font10', #Small Title
+		'@font13@':'font13', #Normal
+		'@font13T@':'font13' #Normal Title
+	}
+}
+
+try:
+	import json
+except:
+	import simplejson as json
+	
+SKIN_XML_PATH = os.path.join(xbmc.translatePath(util.ADDON.getAddonInfo('path')),'resources','skins','Main','720p')
+
+with open(os.path.join(SKIN_XML_PATH,'fonts.json'),'r') as j:
+	WINDOW_FONTS.update(json.load(j))
 		
-def showImage(url):
-	w = ImageViewWindow('service.pushbullet.com-image.xml',util.ADDON.getAddonInfo('path'),'Main','720p',url=url)
+def openWindow(winClass,winXML,**kwargs):
+	winXMLPath = os.path.join(SKIN_XML_PATH,winXML)
+	workingXMLPath = os.path.join(SKIN_XML_PATH,'service.pushbullet.com-working.xml')
+
+	skinName = util.skinName()
+	fonts = WINDOW_FONTS['default']
+	if skinName in WINDOW_FONTS: fonts = WINDOW_FONTS[skinName]
+
+	with open(winXMLPath,'r') as infile:
+		with open(workingXMLPath,'w') as outfile:
+			out = infile.read()
+			for f,r in fonts.items():
+				out = out.replace(f,r)
+			outfile.write(out)
+	w = winClass('service.pushbullet.com-working.xml',util.ADDON.getAddonInfo('path'),'Main','720p',**kwargs)
 	w.doModal()
 	del w
+	os.remove(workingXMLPath)
+
+def showImage(url):
+	openWindow(ImageViewWindow,'service.pushbullet.com-image.xml',url=url)
 
 def showNote(text):
-	w = NoteViewWindow('service.pushbullet.com-note.xml',util.ADDON.getAddonInfo('path'),'Main','720p',text=text)
-	w.doModal()
-	del w
+	openWindow(NoteViewWindow,'service.pushbullet.com-note.xml',text=text)
 
 def showList(data):
-	w = ListViewWindow('service.pushbullet.com-list.xml',util.ADDON.getAddonInfo('path'),'Main','720p',data=data)
-	w.doModal()
-	del w
+	openWindow(ListViewWindow,'service.pushbullet.com-list.xml',data=data)
 
 def start():
-	w = PushbulletWindow('service.pushbullet.com-pushes.xml',util.ADDON.getAddonInfo('path'),'Main','720p')
-	w.doModal()
-	del w
+	openWindow(PushbulletWindow,'service.pushbullet.com-pushes.xml')
 
 		

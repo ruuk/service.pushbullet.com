@@ -1,8 +1,18 @@
 Changelog for service.pushbullet.com
 
+*** 0.1.5 ***
+
+Added ability to switch between viewing pushes for this device, another device or all devices
+Fix for note view not showing any text on some skins
+Added thumbnails for images (and videos when 'Load Video Thumbnails' is enabled)
+Added custom fonts for Aeon MQ 5 and Amber
+Added setting 'Force Specific Device Pushes To View On Start'
+Added setting 'Default Pushes To View On Start' with the options 'This Device', 'All Devices', and 'Last Selection'
+Restructured the settings categories
+
 *** 0.1.4 ***
 
-Fix for some protocols being handled media links in some instances
+Fix for some protocols being handled as media file links in some instances
 Fix for service not starting on initial install
 Fix for service errors when addon is authorized but the device is not linked/added yet
 

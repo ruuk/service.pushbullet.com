@@ -34,6 +34,29 @@ def setSetting(key,value):
 def getToken():
 	return getSetting('token')
 
+def durationToShortText(unixtime):
+	unixtime = int(unixtime)
+	days = int(unixtime/86400)
+	if days: return ('%s day' + (days > 1 and 's' or '')) % days
+	left = unixtime % 86400
+	hours = int(left/3600)
+	if hours:
+		hours = int(round(left/3600.0))
+		return ('%s hour' + (hours > 1 and 's' or '')) % hours
+	left = left % 3600
+	mins = int(left/60)
+	if mins:
+		mins = int(round(left/60.0))
+		return ('%s minute' + (mins > 1 and 's' or '')) % mins
+	sec = int(left % 60)
+	if sec: return ('%s second' + (sec > 1 and 's' or '')) % sec
+	return '0s'
+
+def skinName():
+	skinPath = xbmc.translatePath('special://skin')
+	if skinPath.endswith(os.path.sep): skinPath = skinPath[:-1]
+	return os.path.basename(skinPath).split('skin.')[-1]
+
 class Downloader:
 	def __init__(self,header='Downloading',message=''):
 		self.message = message

@@ -114,6 +114,17 @@ def renameDevice():
 	except PushbulletTargets.PushbulletException, e:
 		showError(e.message)
 
+def selectDevice():
+	from lib import gui, PushbulletTargets
+
+	token = util.getSetting('token')
+
+	client = PushbulletTargets.Client(token)
+
+	ID = gui.selectDevice(client,extra='None')
+	if ID == None: return
+	util.setSetting('selected_device',ID)
+
 def saveToken(token):
 	util.setSetting('token',token)
 
@@ -139,6 +150,18 @@ def main():
 	from lib import gui
 	gui.start()
 
+def handleArg(arg):
+	if arg == 'LINK_DEVICE':
+		linkDevice()
+	elif arg == 'RENAME_DEVICE':
+		renameDevice()
+	elif arg == 'TOKEN_FROM_FILE':
+		loadTokenFromFile()
+	elif arg == 'SELECT_DEVICE':
+		selectDevice()
+	elif arg == 'AUTHORIZE':
+		authorize()
+
 if __name__ == '__main__':
 	try:
 		args = None
@@ -146,14 +169,7 @@ if __name__ == '__main__':
 			args = sys.argv[1:]
 		
 		if args:
-			if args[0] == 'LINK_DEVICE':
-				linkDevice()
-			elif args[0] == 'RENAME_DEVICE':
-				renameDevice()
-			elif args[0] == 'TOKEN_FROM_FILE':
-				loadTokenFromFile()
-			elif args[0] == 'AUTHORIZE':
-				authorize()
+			handleArg(args[0])
 		else:
 			main()
 	except:

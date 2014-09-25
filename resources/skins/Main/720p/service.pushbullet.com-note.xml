@@ -23,9 +23,10 @@
 				<posy>0</posy>
 				<width>1240</width>
 				<height>720</height>
+				<font>@font13@</font>
 				<textcolor>FF000000</textcolor>
+				<shadowcolor>00FFFFFF</shadowcolor>
 				<align>left</align>
-				<label>...</label>
 				<pagecontrol>101</pagecontrol>
 			</control>
 			<control type="scrollbar" id="101">

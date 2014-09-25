@@ -59,8 +59,10 @@
 						<posy>5</posy>
 						<width>1190</width>
 						<height>20</height>
+						<font>@font13@</font>
 						<aligny>center</aligny>
 						<textcolor>FF000000</textcolor>
+						<shadowcolor>00FFFFFF</shadowcolor>
 						<align>left</align>
 						<label>[B]$INFO[ListItem.Label][/B]</label>
 					</control>
@@ -112,8 +114,10 @@
 						<posy>5</posy>
 						<width>1190</width>
 						<height>20</height>
+						<font>@font13@</font>
 						<aligny>center</aligny>
 						<textcolor>FFFFFFFF</textcolor>
+						<shadowcolor>00FFFFFF</shadowcolor>
 						<align>left</align>
 						<label>[B]$INFO[ListItem.Label][/B]</label>
 					</control>
