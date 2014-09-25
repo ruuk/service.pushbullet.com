@@ -1,5 +1,10 @@
 Changelog for service.pushbullet.com
 
+*** 0.1.6 ***
+
+Localize strings
+Added some code to keep service alive through push receiver errors/disconnects
+
 *** 0.1.5 ***
 
 Added ability to switch between viewing pushes for this device, another device or all devices

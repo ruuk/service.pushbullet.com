@@ -304,3 +304,11 @@ msgstr ""
 msgctxt "#32104"
 msgid "Download Complete"
 msgstr ""
+
+msgctxt "#32105"
+msgid "Pushbullet Service"
+msgstr ""
+
+msgctxt "#32106"
+msgid "Receiver Error: Restarting..."
+msgstr ""

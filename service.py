@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import sys
-import xbmc, xbmcgui
+import xbmc
 from lib import util, pushhandler
 
 from lib import PushbulletTargets
@@ -87,9 +87,7 @@ class PushbulletService(xbmc.Monitor):
 				self.idle()
 		self.done()
 		
-	def active(self):
-		util.LOG('SERVICE: ACTIVE')
-					
+	def runServer(self):
 		while self.isActive and not self.targets.terminated and not xbmc.abortRequested:
 			self.targets._th.join(timeout=0.2)
 			if self.device.hasPush():
@@ -101,11 +99,9 @@ class PushbulletService(xbmc.Monitor):
 					if self.showNotification:
 						data = self.device.getNext()
 						if data:
-							xbmcgui.Dialog().notification(
+							util.notify(
 								'{0}: {1}'.format(util.T(32090),data.get('type','?')),
-								data.get('title',''),
-								util.ADDON.getAddonInfo('icon'),
-								5000
+								data.get('title','')
 							)
 					self.device.clear()
 
@@ -113,6 +109,20 @@ class PushbulletService(xbmc.Monitor):
 
 		self.targets.close(force=True)
 		self.targets = None
+
+	def active(self):
+		util.LOG('SERVICE: ACTIVE')
+				
+		try:
+			self.runServer()
+		except:
+			util.ERROR('Server Error')
+			self.token = None
+			util.notify(util.T(32105),util.T(32106))
+			xbmc.sleep(5000)
+
+		if not xbmc.abortRequested: #If not shutting down, reset in case we died of error
+			self.loadSettings()
 	
 	def idle(self):
 		util.LOG('SERVICE: IDLING')

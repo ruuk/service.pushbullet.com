@@ -9,7 +9,7 @@ def LOG(msg):
 	 xbmc.log('service.pushbullet.com: {0}'.format(msg))
 	
 def ERROR(msg):
-	LOG('ERROR: {0}').format(msg)
+	LOG('ERROR: {0}'.format(msg))
 	xbmc.log(traceback.format_exc())
 
 def getSetting(key,default=None):
@@ -32,6 +32,14 @@ def getSetting(key,default=None):
 def setSetting(key,value):
 	return ADDON.setSetting(key, value)
 	
+def notify(heading,msg,icon=ADDON.getAddonInfo('icon'),duration=5000):
+	xbmcgui.Dialog().notification(
+		heading,
+		msg,
+		icon,
+		duration
+	)
+
 def getToken():
 	return getSetting('token')
 
