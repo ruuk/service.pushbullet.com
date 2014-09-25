@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <settings>
-  <category label="Authorization">
-    <setting label="Authorize" type="action" action="RunScript(service.pushbullet.com,AUTHORIZE)" option="close" />
-    <setting id="device_iden" label="Add/Link This Kodi Device" type="action" action="RunScript(service.pushbullet.com,LINK_DEVICE)" option="close" />
-    <setting id="device_name" label="This Kodi Device Name" type="action" action="RunScript(service.pushbullet.com,RENAME_DEVICE)" option="close" enable="!eq(-1,)" />
+  <category label="32001">
+    <setting label="32005" type="action" action="RunScript(service.pushbullet.com,AUTHORIZE)" option="close" />
+    <setting id="device_iden" label="32006" type="action" action="RunScript(service.pushbullet.com,LINK_DEVICE)" option="close" />
+    <setting id="device_name" label="32007" type="action" action="RunScript(service.pushbullet.com,RENAME_DEVICE)" option="close" enable="!eq(-1,)" />
   </category>
-  <category label="Service">
-    <setting id="instant_play" type="bool" default="true" label="Play Media Instantly" />
-    <setting id="interrupt_media" type="bool" default="false" label="Interrupt Video/Music" subsetting="true" enable="eq(-1,true)" />
-    <setting id="show_notification" type="bool" default="false" label="Show Notification On New Push" enable="eq(-2,false)" />
+  <category label="32002">
+    <setting id="instant_play" type="bool" default="true" label="32008" />
+    <setting id="interrupt_media" type="bool" default="false" label="32009" subsetting="true" enable="eq(-1,true)" />
+    <setting id="show_notification" type="bool" default="false" label="32010" enable="eq(-2,false)" />
   </category>
-  <category label="Interface">
-    <setting id="load_video_thumbs" type="bool" default="false" label="Load Video Thumbnails (SLOW)" />
-    <setting id="selected_device" label="Force Specific Device Pushes To View On Start" type="action" action="RunScript(service.pushbullet.com,SELECT_DEVICE)" />
-    <setting id="default_view_mode" type="enum" label="Default Pushes To View On Start" values="This Device|All Devices|Last Selection" default="0" enable="eq(-1,)" />
+  <category label="32003">
+    <setting id="load_video_thumbs" type="bool" default="false" label="32011" />
+    <setting id="selected_device" label="32012" type="action" action="RunScript(service.pushbullet.com,SELECT_DEVICE)" />
+    <setting id="default_view_mode" type="enum" label="32013" lvalues="32016|32017|32018" default="0" enable="eq(-1,)" />
   </category>
-  <category label="Advanced">
-    <setting id="token" type="text" label="Pushbullet Token" />
-	<setting  label="Load Token From File" type="action" action="RunScript(service.pushbullet.com,TOKEN_FROM_FILE)" />
+  <category label="32004">
+    <setting id="token" type="text" label="32014" />
+	<setting  label="32015" type="action" action="RunScript(service.pushbullet.com,TOKEN_FROM_FILE)" />
   </category>
 </settings>

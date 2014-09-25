@@ -7,6 +7,8 @@ import devices
 import maps
 import YDStreamExtractor as StreamExtractor 
 
+T = util.T
+
 CACHE_PATH = os.path.join(xbmc.translatePath(util.ADDON.getAddonInfo('profile')),'cache')
 if not os.path.exists(CACHE_PATH): os.makedirs(CACHE_PATH)
 
@@ -28,17 +30,17 @@ def cleanCache(used_ids):
 	for ID in os.listdir(CACHE_PATH):
 		if not ID in used_ids: deleteCachedData(ID)
 
-def selectDevice(client,extra='Cancel'):
+def selectDevice(client,extra=T(32050)):
 	deviceMap = {}
 	try:
 		for d in client.getDevicesList():
 			if not d.get('active'): continue
 			deviceMap[d['iden']] = d['nickname']
 	except PushbulletTargets.PushbulletException, e:
-		xbmcgui.Dialog().ok('ERROR', 'Error:','',e.message)
+		xbmcgui.Dialog().ok(T(32051).upper(), '{0}:'.format(T(32051)),'',e.message)
 		return
 	
-	idx = xbmcgui.Dialog().select('Choose Device',deviceMap.values() + [extra])
+	idx = xbmcgui.Dialog().select(T(32052),deviceMap.values() + [extra])
 	if idx < 0: return
 	if idx >= len(deviceMap.keys()): return ''
 	return deviceMap.keys()[idx]
@@ -166,7 +168,7 @@ class PushbulletWindow(BaseWindow):
 			item.setProperty('media_icon',mediaIcon)
 			item.setProperty('background',bg)
 			#item.setProperty('date',time.strftime('%m-%d-%Y %H:%M',time.localtime(push.get('created',0))))
-			item.setProperty('date','{0} ago'.format(util.durationToShortText(time.time() - push.get('created',0))))
+			item.setProperty('date','{0} {1}'.format(util.durationToShortText(time.time() - push.get('created',0)),T(32053)))
 			items.append(item)
 
 		self.setProperty('loading','0')
@@ -182,7 +184,7 @@ class PushbulletWindow(BaseWindow):
 			push = self.getSelectedPush()
 			if not push: return
 			if not pushhandler.handlePush(push,from_gui=True):
-				xbmcgui.Dialog().ok('Sorry','Sorry:','','No handler for this type of push.')
+				xbmcgui.Dialog().ok(T(32054),'{0}:'.format(T(32054)),'',T(32055))
 
 	def onAction(self,action):
 		try:
@@ -215,16 +217,16 @@ class PushbulletWindow(BaseWindow):
 		selected = self.pushList.getSelectedPosition()
 		options = []
 		if self.viewMode != 'ALL':
-			options.append(('show_all','Show Pushes For All Devices'))
+			options.append(('show_all',T(32056)))
 		if self.viewMode != 'SELF':
-			options.append(('show_self','Show Pushes For This Device'))
-		options.append(('show_device','Show Pushes For Another Device'))
+			options.append(('show_self',T(32057)))
+		options.append(('show_device',T(32058)))
 		if selected >= 0:
 			push = self.pushes[selected]
 			if push.get('type') in ('file','link'):
-				options.append(('download','Download'))
-			options.append(('delete','Delete'))
-		idx = xbmcgui.Dialog().select('Options',[o[1] for o in options])
+				options.append(('download',T(32059)))
+			options.append(('delete',T(32060)))
+		idx = xbmcgui.Dialog().select(T(32061),[o[1] for o in options])
 		if idx < 0: return
 		choice = options[idx][0]
 		
@@ -246,9 +248,9 @@ class PushbulletWindow(BaseWindow):
 
 			fname, ftype = d.downloadURL(targetDir,url,fname=push.get('file_name'),final_target_dir=finalTargetDir)
 			if fname:
-				xbmcgui.Dialog().ok('Done','Download Complete:','[CR]',fname)
+				xbmcgui.Dialog().ok(T(32062),'{0}:'.format(T(32063)),'[CR]',fname)
 			else:
-				xbmcgui.Dialog().ok('Download Failed','[CR]','Download Failed')
+				xbmcgui.Dialog().ok(T(32064),'[CR]',T(32064))
 
 		elif choice == 'delete':
 			#set last selected to the item above, or the item below if we are at the top

@@ -102,7 +102,7 @@ class PushbulletService(xbmc.Monitor):
 						data = self.device.getNext()
 						if data:
 							xbmcgui.Dialog().notification(
-								'New Push: {0}'.format(data.get('type','?')),
+								'{0}: {1}'.format(util.T(32090),data.get('type','?')),
 								data.get('title',''),
 								util.ADDON.getAddonInfo('icon'),
 								5000

@@ -3,6 +3,7 @@ import xbmc, xbmcgui, xbmcaddon, xbmcvfs
 import urllib2, urlparse, traceback, os
 
 ADDON = xbmcaddon.Addon()
+T = ADDON.getLocalizedString
 
 def LOG(msg):
 	 xbmc.log('service.pushbullet.com: {0}'.format(msg))
@@ -37,20 +38,21 @@ def getToken():
 def durationToShortText(unixtime):
 	unixtime = int(unixtime)
 	days = int(unixtime/86400)
-	if days: return ('%s day' + (days > 1 and 's' or '')) % days
+	if days: return '{0} {1}'.format(days,days > 1 and T(32096) or T(32092))
 	left = unixtime % 86400
 	hours = int(left/3600)
 	if hours:
 		hours = int(round(left/3600.0))
-		return ('%s hour' + (hours > 1 and 's' or '')) % hours
+		return '{0} {1}'.format(hours,hours > 1 and T(32097) or T(32093))
 	left = left % 3600
 	mins = int(left/60)
 	if mins:
 		mins = int(round(left/60.0))
-		return ('%s minute' + (mins > 1 and 's' or '')) % mins
-	sec = int(left % 60)
-	if sec: return ('%s second' + (sec > 1 and 's' or '')) % sec
-	return '0s'
+		return '{0} {1}'.format(mins,mins > 1 and T(32098) or T(32094))
+	secs = int(left % 60)
+	if secs:
+		return '{0} {1}'.format(secs,secs > 1 and T(32099) or T(32095))
+	return '0 {0}'.format(T(32099))
 
 def skinName():
 	skinPath = xbmc.translatePath('special://skin')
@@ -58,7 +60,7 @@ def skinName():
 	return os.path.basename(skinPath).split('skin.')[-1]
 
 class Downloader:
-	def __init__(self,header='Downloading',message=''):
+	def __init__(self,header=T(32100),message=''):
 		self.message = message
 		self.prog = xbmcgui.DialogProgress()
 		self.prog.create(header,message)
@@ -80,7 +82,7 @@ class Downloader:
 			for url,i in zip(urllist,range(0,self.total)):
 				self.current = i
 				if self.prog.iscanceled(): break
-				self.display = 'File {0} of {1}'.format(i+1,self.total)
+				self.display = T(32101).format(i+1,self.total)
 				self.prog.update(int((i/float(self.total))*100),self.message,self.display)
 				fname = os.path.join(targetdir,str(i) + ext)
 				fname, ftype = self.getUrlFile(url,fname,callback=self.progCallback) #@UnusedVariable
@@ -110,7 +112,7 @@ class Downloader:
 		
 		try:
 			self.current = 0
-			self.display = 'Downloading {0}'.format(os.path.basename(path))
+			self.display = '{0}: {1}'.format(T(32100),os.path.basename(path))
 			self.prog.update(0,self.message,self.display)
 			t,ftype = self.getUrlFile(url,path,callback=self.progCallback) #@UnusedVariable
 		except:
@@ -158,7 +160,7 @@ class Downloader:
 		return (target,ftype)
 
 	def chooseDirectory(self):
-		fpath = xbmcgui.Dialog().browseSingle(3,'Choose Directory','files')
+		fpath = xbmcgui.Dialog().browseSingle(3,T(32102),'files')
 		if not fpath: return None
 		return fpath
 
@@ -176,9 +178,9 @@ class Downloader:
 			finally:
 				StreamExtractor.setOutputCallback(None)
 		if not result and result.status != 'canceled':
-				xbmcgui.Dialog().ok('Download Failed','[CR]',result.message)
+				xbmcgui.Dialog().ok(T(32103),'[CR]',result.message)
 		elif result:
-			xbmcgui.Dialog().ok('Done','Download Complete','[CR]',result.filepath)
+			xbmcgui.Dialog().ok(T(32062),T(32104),'[CR]',result.filepath)
 		if target:
 			xbmcvfs.copy(result.filepath,os.path.join(target,os.path.basename(result.filepath)))
 			xbmcvfs.delete(result.filepath)

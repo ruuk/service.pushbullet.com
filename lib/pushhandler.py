@@ -51,7 +51,7 @@ def handlePush(data,from_gui=False):
 					vlist = []
 					for info in vid.streams():
 						vlist.append(info['title'] or '?')
-					idx = xbmcgui.Dialog().select('Select Video',vlist)
+					idx = xbmcgui.Dialog().select(util.T(32091),vlist)
 					if idx < 0: return
 					vid.selectStream(idx)
 				util.LOG(vid.streamURL()) #TODO: REMOVE

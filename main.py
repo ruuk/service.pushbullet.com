@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 import sys
 from lib import util
+T = util.T
 
 def showError(msg):
 	import xbmcgui
-	xbmcgui.Dialog().ok('ERROR', 'Error:','',msg)
+	xbmcgui.Dialog().ok(T(32051).upper(), '{0}:'.format(T(32051)),'',msg)
 	
 def loadTokenFromFile():
 	import OAuthHelper
@@ -29,11 +30,11 @@ def addNewDevice(client,device):
 	
 	#TODO: Check for existing device nickname and handle	
 	
-	device.name = xbmcgui.Dialog().input('Enter a name for this device:',device.name or 'Kodi Device') or device.name
+	device.name = xbmcgui.Dialog().input('{0}:'.format(T(32065)),device.name or T(32066)) or device.name
 	if not device.name: return False
 	
 	while deviceNameExists(client,device.name):
-		device.name = xbmcgui.Dialog().input('Device already exists. Try again.',device.name or '')
+		device.name = xbmcgui.Dialog().input(T(32067),device.name or '')
 		if not device.name: return
 		
 	try:
@@ -52,7 +53,7 @@ def linkDevice():
 	token = util.getSetting('token')
 	
 	if not token:
-		xbmcgui.Dialog().ok('No Token', 'User token not set.','Please set the token and try again')
+		xbmcgui.Dialog().ok(T(32068), T(32069),T(32070))
 		return
 		
 	client = PushbulletTargets.Client(token)
@@ -65,7 +66,7 @@ def linkDevice():
 		showError(e.message)
 		return
 	
-	idx = xbmcgui.Dialog().select('Choose Device',deviceMap.values() + ['+ Add As New'])
+	idx = xbmcgui.Dialog().select(T(32071),deviceMap.values() + [T(32072)])
 	if idx < 0: return
 	
 	dev = devices.KodiDevice(None,util.getSetting('device_name') or None)
@@ -78,7 +79,7 @@ def linkDevice():
 	util.setSetting('device_iden',dev.ID)
 	util.setSetting('device_name',dev.name)
 	util.LOG('DEVICE LINKED: {0}'.format(dev.name))
-	xbmcgui.Dialog().ok('Linked', 'This Kodi device: ', '  [B]{0}[/B]'.format(dev.name), 'is ready to receive push notices.')
+	xbmcgui.Dialog().ok(T(32073), '{0}: '.format(T(32074)), '  [B]{0}[/B]'.format(dev.name), T(32075))
 
 def renameDevice():
 	import xbmcgui
@@ -88,8 +89,8 @@ def renameDevice():
 	
 	dev = devices.getDefaultKodiDevice()
 	if not dev.ID:
-		xbmcgui.Dialog().ok('Not Linked','This device is not yet linked.')
-	name = xbmcgui.Dialog().input('Enter a new name for this device:',dev.name or '')
+		xbmcgui.Dialog().ok(T(32076),T(32077))
+	name = xbmcgui.Dialog().input('{0}:'.format(T(32078)),dev.name or '')
 	if not name: return
 	if name == dev.name: return
 	
@@ -98,18 +99,18 @@ def renameDevice():
 	client = PushbulletTargets.Client(token)
 	
 	while deviceNameExists(client,name):
-		name = xbmcgui.Dialog().input('Device already exists. Try again.',dev.name or '')
+		name = xbmcgui.Dialog().input(T(32079),dev.name or '')
 		if not name: return
 		if name == dev.name: return
 
 	if not token:
-		xbmcgui.Dialog().ok('No Token', 'User token not set.','Please set the token and try again')
+		xbmcgui.Dialog().ok(T(32068),T(32080),T(32081))
 		return
 		
 	try:
 		if client.updateDevice(dev,nickname=name):
 			util.setSetting('device_name',dev.name)
-			xbmcgui.Dialog().ok('Done','Device renamed to: ','',dev.name)
+			xbmcgui.Dialog().ok(T(32062),'{0}: '.format(T(32082)),'',dev.name)
 			
 	except PushbulletTargets.PushbulletException, e:
 		showError(e.message)
@@ -121,7 +122,7 @@ def selectDevice():
 
 	client = PushbulletTargets.Client(token)
 
-	ID = gui.selectDevice(client,extra='None')
+	ID = gui.selectDevice(client,extra=T(32083))
 	if ID == None: return
 	util.setSetting('selected_device',ID)
 
@@ -137,13 +138,13 @@ def authorize():
 def main():
 	if not util.getToken():
 		import xbmcgui
-		xbmcgui.Dialog().ok('Needs Setup','Please open the addon settings, ','authorize the addon and add this device.')
+		xbmcgui.Dialog().ok(T(32084),T(32085),T(32086))
 		util.ADDON.openSettings()
 		return
 		
 	if not util.getSetting('device_iden'):
 		import xbmcgui
-		xbmcgui.Dialog().ok('Needs Setup','This device still needs to be added.','Please open the addon settings, ','and add this device.')
+		xbmcgui.Dialog().ok(T(32084),T(32087),T(32088),T(32089))
 		util.ADDON.openSettings()
 		return
 
