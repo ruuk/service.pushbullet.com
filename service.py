@@ -132,16 +132,21 @@ class PushbulletService(xbmc.Monitor):
 		util.LOG('SERVICE: DONE')
 
 if __name__ == '__main__':
-	try:
-		args = None
-		if len(sys.argv) > 1:
-			args = sys.argv[1:]
-		
-		if args:
-			import main
-			main.handleArg(args[0])
-		else:
-			PushbulletService()
-	except:
-		import traceback
-		traceback.print_exc()
+	print sys.argv
+	if sys.argv[0] == 'service.pushbullet.com' and len(sys.argv) < 2:
+		import main
+		main.main()
+	else:
+		try:
+			args = None
+			if len(sys.argv) > 1:
+				args = sys.argv[1:]
+			
+			if args:
+				import main
+				main.handleArg(args[0])
+			else:
+				PushbulletService()
+		except:
+			import traceback
+			traceback.print_exc()

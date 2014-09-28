@@ -1,5 +1,9 @@
 Changelog for service.pushbullet.com
 
+*** 0.1.9 ***
+
+Fix for service being started a second time instead of starting the interface when started from the home screen
+
 *** 0.1.8 ***
 
 Fix the hardcoded fake email I had in there while I was taking a screenshot
