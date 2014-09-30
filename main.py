@@ -87,8 +87,8 @@ def renameDevice():
 	from lib import PushbulletTargets
 	from lib import util
 	
-	dev = devices.getDefaultKodiDevice()
-	if not dev.ID:
+	dev = devices.getDefaultKodiDevice(util.getSetting('device_iden'),util.getSetting('device_name'))
+	if not dev or not dev.ID:
 		xbmcgui.Dialog().ok(T(32076),T(32077))
 	name = xbmcgui.Dialog().input('{0}:'.format(T(32078)),dev.name or '')
 	if not name: return

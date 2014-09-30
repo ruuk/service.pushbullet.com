@@ -65,9 +65,6 @@ class KodiDevice(PushbulletTargets.Device):
 		self.queue.put_nowait(data)
 		return False
 
-def getDefaultKodiDevice(device=None):
-	ID = util.getSetting('device_iden')
-	if not ID: return None
-	if device and device.ID == ID: return device
-	name = util.getSetting('device_name')
+def getDefaultKodiDevice(ID,name):
+	assert ID and name, 'Must provide device ID and name'
 	return KodiDevice(ID,name)

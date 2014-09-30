@@ -94,7 +94,7 @@ class PushbulletWindow(BaseWindow):
 		if not token: return
 		
 		loadVideoThumbs = util.getSetting('load_video_thumbs',False)
-		kodiDevice = devices.getDefaultKodiDevice()
+		kodiDevice = devices.getDefaultKodiDevice(util.getSetting('device_iden'),util.getSetting('device_name'))
 		if not kodiDevice: return
 		self.pushes = []
 		pushes = self.client.pushes()

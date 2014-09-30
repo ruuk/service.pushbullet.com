@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
-import sys
+import sys, time
 import xbmc
 from lib import util, pushhandler
-from lib.PushbulletTargets.ws4py.exc import HandshakeError
 from lib import PushbulletTargets
 PushbulletTargets.LOG = util.LOG
 
@@ -13,71 +12,114 @@ def ERROR():
 	import traceback
 	xbmc.log(traceback.format_exc())
 
-class PushbulletService(xbmc.Monitor):
+class TargetsBox(object):
 	def __init__(self):
-		self.isActive = False
-		self.targets = None
-		self.token = None
-		self.device = None
-		self.start()
-
-	def onAbortRequested(self):
-		if not self.targets: return
-		self.targets.close(force=True)
-
-	def onSettingsChanged(self):
-		self.loadSettings()
-
-	def loadSettings(self):
-		oldToken = self.token
-		oldDevice = self.device
-		self.interruptMedia = util.getSetting('interrupt_media',False)
-		self.instantPlay = util.getSetting('instant_play',True)
-		self.showNotification = util.getSetting('show_notification',True)
 		self.token = util.getSetting('token')
-		self.device = devices.getDefaultKodiDevice(self.device)
+		self.deviceID = util.getSetting('device_iden')
+		self.deviceName = util.getSetting('device_name')
+		self.device = None
+		self.targets = None
 
-		self.isActive = self.token and self.device and self.device.isValid()
-		if self.isActive:
-			if not self.targets or self.token != oldToken:
-				self.setTargets(oldToken)
-			elif self.targets and self.device != oldDevice:
-				self.targets.unregisterDevice(oldDevice)
-				self.targets.registerDevice(self.device)
-				util.LOG('DEVICE CHANGED FROM: {0} TO: {1}'.format(oldDevice.name,self.device.name))
+		self.reconnectDelay = 5
+		self.nextReconnect = 0
+		self.hasConnected = False
+		self.connectFailed = False
+		self.start()
+		self.connect()
 
-	def mostRecentUpdated(self,modified):
-		util.setSetting('most_recent','{0:10f}'.format(modified))
-
-	def setTargets(self,oldToken):
-		old = self.targets
-		
-		targets = PushbulletTargets.Targets(
+	def start(self):
+		self.targets = PushbulletTargets.Targets(
 			self.token,
 			most_recent=util.getSetting('most_recent',0),
 			most_recent_callback=self.mostRecentUpdated
 		)
-		
-		targets.registerDevice(self.device)
+
+		self.device = devices.getDefaultKodiDevice(self.deviceID,self.deviceName)
+		self.targets.registerDevice(self.device)
+
+	def ready(self):
+		return self.hasConnected and not self.connectFailed and not self.targets.terminated and self.readyToReconnect()
+
+	def join(self,timeout=0.2):
+		self.targets._th.join(timeout=timeout)
+
+	def mostRecentUpdated(self,modified):
+		util.setSetting('most_recent','{0:10f}'.format(modified))
+
+	def close(self):
 		try:
-			targets.connect()
-		except HandshakeError:
-			ERROR()
-			self.token = oldToken
-			if self.targets: self.targets.registerDevice(self.device)
-			self.isActive = self.token and self.device.isValid()
-			util.LOG('CONNECT HANDSHAKE ERROR - REVERTING TOKEN')
+			self.targets.close(force=True)
+			self.targets._th.join()
+		except RuntimeError:
+			pass
+
+	def updateReconnectDelay(self):
+		if self.reconnectDelay > 60: return
+		self.reconnectDelay *= 2
+
+	def readyToReconnect(self):
+		return time.time() > self.nextReconnect
+
+	def connect(self):
+		try:
+			self.targets.connect()
+			self.hasConnected = True
+			self.connectFailed = False
+			self.reconnectDelay = 5
+		except PushbulletTargets.ws4py.exc.HandshakeError, e:
+			self.connectFailed = True
+			if '401' in e.msg:
+				util.LOG('CONNECT HANDSHAKE ERROR - BAD TOKEN')
+			else:
+				ERROR('CONNECT HANDSHAKE ERROR')
 			return
 		except:
-			self.targets = None
-			util.LOG('CONNECT ERROR: Waiting 5 seconds')
-			xbmc.sleep(5000)
+			self.connectFailed = True
+			ERROR()
+			self.nextReconnect = time.time() + self.reconnectDelay
+			util.LOG('CONNECT ERROR: Waiting {0} seconds'.format(self.reconnectDelay))
+			self.updateReconnectDelay()
+			return
 
-		self.targets = targets
+class PushbulletService(xbmc.Monitor):
+	def __init__(self):
+		self.targetsBox = None
+		self.start()
 
-		if old:
-			util.LOG('TOKEN CHANGED - TARGETS RESET')
-			old.close(force=True)
+	def onAbortRequested(self):
+		if not self.targetsBox: return
+		self.targetsBox.close()
+
+	def onSettingsChanged(self):
+		self.loadSettings()
+
+	def credentialsUpdated(self):
+		token = util.getSetting('token')
+		deviceID = util.getSetting('device_iden')
+		if not self.targetsBox:
+			if token and deviceID:
+				return True
+			else:
+				return None
+		if token != self.targetsBox.token:
+			util.LOG('TOKEN CHANGED')
+			return True
+
+		if deviceID != self.targetsBox.deviceID:
+			util.LOG('DEVICE CHANGED FROM: {0} TO: {1}'.format(self.targetsBox.deviceName,util.getSetting('device_name')))
+			return True
+
+		return False
+		
+	def loadSettings(self):
+		self.reconnectDelay = 5
+		self.interruptMedia = util.getSetting('interrupt_media',False)
+		self.instantPlay = util.getSetting('instant_play',True)
+		self.showNotification = util.getSetting('show_notification',True)
+		
+		if self.credentialsUpdated():
+			if self.targetsBox: self.targetsBox.close()
+			self.targetsBox = TargetsBox()
 
 	def start(self):
 		util.LOG('SERVICE: STARTED')
@@ -85,34 +127,34 @@ class PushbulletService(xbmc.Monitor):
 		self.loadSettings()
 		
 		while not xbmc.abortRequested:
-			if self.targets and self.isActive:
+			if self.targetsBox and self.targetsBox.ready():
 				self.active()
 			else:
 				self.idle()
 		self.done()
 		
 	def runServer(self):
-		while self.isActive and not self.targets.terminated and not xbmc.abortRequested:
-			self.targets._th.join(timeout=0.2)
-			if self.device.hasPush():
+		while self.targetsBox.ready() and not xbmc.abortRequested:
+			self.targetsBox.join()
+			if self.targetsBox.device.hasPush():
 				if self.instantPlay:
 					if not StreamUtils.isPlaying() or self.interruptMedia:
-						data = self.device.getNext()
+						data = self.targetsBox.device.getNext()
 						if data: pushhandler.handlePush(data)
 				else:
 					if self.showNotification:
-						data = self.device.getNext()
+						data = self.targetsBox.device.getNext()
 						if data:
 							util.notify(
 								'{0}: {1}'.format(util.T(32090),data.get('type','?')),
 								data.get('title','')
 							)
-					self.device.clear()
+					self.targetsBox.device.clear()
 
 			xbmc.sleep(200)
-
-		self.targets.close(force=True)
-		self.targets = None
+		
+		self.targetsBox.close()
+		self.targetsBox = None
 
 	def active(self):
 		util.LOG('SERVICE: ACTIVE')
@@ -121,22 +163,21 @@ class PushbulletService(xbmc.Monitor):
 			self.runServer()
 		except:
 			util.ERROR('Server Error')
-			self.token = None
 			util.notify(util.T(32105),util.T(32106))
 			xbmc.sleep(5000)
 
 		if not xbmc.abortRequested: #If not shutting down, reset in case we died of error
 			self.loadSettings()
-	
+		
 	def idle(self):
 		util.LOG('SERVICE: IDLING')
-		while not self.isActive and not xbmc.abortRequested: xbmc.sleep(1000)
+		while not (self.targetsBox and self.targetsBox.ready()) and not xbmc.abortRequested:
+			xbmc.sleep(1000)
 
 	def done(self):
 		util.LOG('SERVICE: DONE')
 
 if __name__ == '__main__':
-	print sys.argv
 	if sys.argv[0] == 'service.pushbullet.com' and len(sys.argv) < 2:
 		import main
 		main.main()
