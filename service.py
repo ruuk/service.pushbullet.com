@@ -2,7 +2,7 @@
 import sys
 import xbmc
 from lib import util, pushhandler
-
+from lib.PushbulletTargets.ws4py.exc import HandshakeError
 from lib import PushbulletTargets
 PushbulletTargets.LOG = util.LOG
 
@@ -61,13 +61,17 @@ class PushbulletService(xbmc.Monitor):
 		targets.registerDevice(self.device)
 		try:
 			targets.connect()
-		except:
+		except HandshakeError:
 			ERROR()
 			self.token = oldToken
 			if self.targets: self.targets.registerDevice(self.device)
 			self.isActive = self.token and self.device.isValid()
-			util.LOG('CONNECT ERROR - REVERTING TOKEN')
+			util.LOG('CONNECT HANDSHAKE ERROR - REVERTING TOKEN')
 			return
+		except:
+			self.targets = None
+			util.LOG('CONNECT ERROR: Waiting 5 seconds')
+			xbmc.sleep(5000)
 
 		self.targets = targets
 
