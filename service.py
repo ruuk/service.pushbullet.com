@@ -23,7 +23,7 @@ class TargetsBox(object):
 		self.reconnectDelay = 5
 		self.nextReconnect = 0
 		self.hasConnected = False
-		self.connectFailed = False
+		self.badToken = False
 		self.start()
 		self.connect()
 
@@ -38,7 +38,12 @@ class TargetsBox(object):
 		self.targets.registerDevice(self.device)
 
 	def ready(self):
-		return self.hasConnected and not self.connectFailed and not self.targets.terminated and self.readyToReconnect()
+		if self.badToken: return False
+		if self.hasConnected:
+			return not self.badToken and not self.targets.terminated and self.readyToReconnect()
+		else:
+			if not self.readyToReconnect(): return False
+			self.connect()
 
 	def join(self,timeout=0.2):
 		self.targets._th.join(timeout=timeout)
@@ -64,17 +69,16 @@ class TargetsBox(object):
 		try:
 			self.targets.connect()
 			self.hasConnected = True
-			self.connectFailed = False
+			self.badToken = False
 			self.reconnectDelay = 5
 		except PushbulletTargets.ws4py.exc.HandshakeError, e:
-			self.connectFailed = True
+			self.badToken = True
 			if '401' in e.msg:
 				util.LOG('CONNECT HANDSHAKE ERROR - BAD TOKEN')
 			else:
 				ERROR('CONNECT HANDSHAKE ERROR')
 			return
 		except:
-			self.connectFailed = True
 			ERROR()
 			self.nextReconnect = time.time() + self.reconnectDelay
 			util.LOG('CONNECT ERROR: Waiting {0} seconds'.format(self.reconnectDelay))
@@ -122,7 +126,7 @@ class PushbulletService(xbmc.Monitor):
 			self.targetsBox = TargetsBox()
 
 	def start(self):
-		util.LOG('SERVICE: STARTED')
+		util.LOG('SERVICE: STARTED {0}'.format(util.ADDON.getAddonInfo('version')))
 		
 		self.loadSettings()
 		

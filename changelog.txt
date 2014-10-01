@@ -1,5 +1,10 @@
 Changelog for service.pushbullet.com
 
+*** 0.1.10 ***
+
+Fix for service dying/not reconnecting when returning from sleep/suspend/hibernate
+Generally better handling of disconnects and connection errors
+
 *** 0.1.9 ***
 
 Fix for service being started a second time instead of starting the interface when started from the home screen
