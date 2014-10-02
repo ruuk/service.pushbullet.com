@@ -1,5 +1,9 @@
 Changelog for service.pushbullet.com
 
+*** 0.1.11 ***
+
+Bump up OAuth module version requirement to 0.0.6
+
 *** 0.1.10 ***
 
 Fix for service dying/not reconnecting when returning from sleep/suspend/hibernate
