@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <settings>
   <category label="32001">
-    <setting label="32005" type="action" action="RunScript(service.pushbullet.com,AUTHORIZE)" option="close" />
+    <setting id="authorize_action" label="32005" type="action" action="RunScript(service.pushbullet.com,AUTHORIZE)" option="close" />
     <setting id="device_iden" label="32006" type="action" action="RunScript(service.pushbullet.com,LINK_DEVICE)" option="close" />
     <setting id="device_name" label="32007" type="action" action="RunScript(service.pushbullet.com,RENAME_DEVICE)" option="close" enable="!eq(-1,)" />
   </category>
@@ -17,6 +17,6 @@
   </category>
   <category label="32004">
     <setting id="token" type="text" label="32014" />
-	<setting  label="32015" type="action" action="RunScript(service.pushbullet.com,TOKEN_FROM_FILE)" />
+	<setting id="load_token_action" label="32015" type="action" action="RunScript(service.pushbullet.com,TOKEN_FROM_FILE)" />
   </category>
 </settings>

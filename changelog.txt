@@ -1,5 +1,10 @@
 Changelog for service.pushbullet.com
 
+*** 0.1.12 ***
+
+Change from using requests2-2.2.1 module to requests-2.3.0
+Bump up OAuth module version requirement to 0.0.7
+
 *** 0.1.11 ***
 
 Bump up OAuth module version requirement to 0.0.6
