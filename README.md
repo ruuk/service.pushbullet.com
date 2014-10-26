@@ -1,3 +1,6 @@
+DEPRECATED - Merged with elbowz [xbmc.service.pushbullet](https://github.com/elbowz/xbmc.service.pushbullet)
+======================
+
 service.pushbullet.com
 ======================
 
